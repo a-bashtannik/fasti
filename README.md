@@ -1,3 +1,6 @@
+⚠️ Work in Progress
+Note: This package is currently under development and not ready for production use.
+
 <p align="center">
 <img height="100%" src="assets/cover.png" alt="Laravel Package Skeleton Logo"/>
 
