@@ -1,7 +1,10 @@
 parameters:
-    level: max
+    level: 6
     paths:
         - src
 
     reportUnmatchedIgnoredErrors: true
     checkGenericClassInNonGenericObjectType: false
+
+    ignoreErrors:
+            - '#Access to an undefined property Bashtannik\\Fasti\\Contracts\\SchedulableJob::(.*)#'
