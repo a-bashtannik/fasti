@@ -1,5 +1,7 @@
-⚠️ Work in Progress
-Note: This package is currently under development and not ready for production use.
+# ⚠️ Work in Progress
+#### Note: This package is currently under development and not ready for production use.
+--
+
 
 <p align="center">
 <img height="100%" src="assets/cover.png" alt="Laravel Package Skeleton Logo"/>
@@ -31,7 +33,14 @@ Fasti::schedule($job, '2024-12-31 23:59:59'); // Schedule a job for New Year's E
 composer require a-bashtannik/fasti
 ```
 
-Fasti is built with developers in mind.
+Add the tick command to your `console.php` file:
+
+```php
+use Bashtannik\Fasti\Console\Commands\FastiTickCommand;
+
+Schedule::command(FastiTickCommand::class)->everyMinute();
+
+```
 
 ## Usage
 
@@ -83,11 +92,12 @@ Fasti includes a lightweight Eloquent model that stores essential job informatio
 
 use \Bashtannik\Fasti\Facades\Fasti;
 
-Fasti::all(); // Retrieve all scheduled tasks
-Fasti::scheduled($at); // Retrieve all tasks scheduled at a specific time
-Fasti::cancel($id); // Cancel a scheduled task
-Fasti::cancelled(); // Retrieve all canceled tasks
-Fasti::find($id); // Retrieve a scheduled task by ID
+Fasti::all(); 
+Fasti::schedule($job, $at);
+Fasti::scheduled($at); // List all jobs scheduled for a specific time
+Fasti::cancel($job);
+Fasti::cancelled(); // List all cancelled jobs
+Fasti::find($id);
 
 // Or use the Eloquent model directly
 
@@ -104,15 +114,30 @@ Test your scheduled jobs with ease using Fasti's `Fasti::fake()` method and buil
 ```php
 use \Bashtannik\Fasti\Facades\Fasti;
 
-Fasti::fake();
+// If you are using custom model or repository, avoid using this method and test real storage instead.
+
+Fasti::fake(); 
+
+// Test if the expected job is scheduled
 
 Fasti::assertScheduled($job);
+
+// Or by job class name
+
+Fasti::assertScheduled(SendGreetingEmail::class);
+
+// Add custom assertion by using callback
+
+Fasti::assertScheduled(function ($job) {
+    return $job->type === 'send_greeting_email';
+});
+
+// Many other assertions are available
+
 Fasti::assertNotScheduled($job);
-
-Fasti::assertScheduledAt();
-Fasti::assertNotScheduledAt();
-
-Fasti::assertCancelled()
+Fasti::assertScheduledAt($job, '2024-12-31 23:59:59');
+Fasti::assertNotScheduledAt($job, '2024-12-31 23:59:59');
+Fasti::assertCancelled($job);
 
 ```
 
@@ -120,7 +145,7 @@ Fasti operates as a scheduling layer for your Laravel jobs, focusing solely on w
 
 Instead, when the scheduled time arrives, Fasti simply hands off the job to Laravel's default `Bus`.
 
-It means you are free to use well-known Bus assertion methods shipped with Laravel. 
+It means you are free to use well-known Bus assertion methods shipped with Laravel when the job is dispatched to the queue. 
 
 ```php
 
@@ -149,7 +174,7 @@ class MyOwnModel extends Model implements SchedulableJob
 
 ```
 
-Create your own repository that implements the `FastiRepository` interface and bind it in your app service provider `register()` method.
+Create your own repository that implements the `FastiScheduledJobsRepository` interface and bind it in your app service provider `register()` method.
 
 ```php
 use Bashtannik\Fasti\Repositories\FastiRepository;
@@ -159,20 +184,31 @@ $this->app->bind(
     FastiScheduledJobsRepository::class,
     MyOwnRepository::class
 );
+
+// Or if you just need to switch the model
+
+$this->app->bind(
+    FastiScheduledJobsRepository::class,
+    function () {
+        $repository = new FastiEloquentRepository;
+        $respository::$model = MyOwnModel::class;
+        
+        return $repository;
+    }
+);
 ```
 
-Or use more context-aware approach and switch your repository on the fly.
+### Hint: store human-friendly job type name
+
+When using `FastiEloquentRepository` repository, by default it stores class name in the `type` field.
+However, you can define your own set of human-friendly names in your AppServiceProvider like you do with morph-many relationships.
 
 ```php
-use \Bashtannik\Fasti\Facades\Fasti;
+use Bashtannik\Fasti\Repositories\FastiEloquentRepository;
 
-$repository = new MyOwnRepository(
-    user: $user,
-    company: $company,
-);
-
-Fasti::setRepository($repository);
-
+FastiEloquentRepository::enforceTypeMapping([
+    'fake_job' => FakeJob::class,
+]);
 ```
 
-You are done, now Fasti will use your custom repository to manage scheduled jobs.
+This field doesn't affect the job execution but can be useful for debugging or logging purposes.

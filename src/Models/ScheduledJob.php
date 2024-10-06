@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * @property int $id
+ * @property string $type
  * @property string $payload
  * @property CarbonImmutable|null $cancelled_at
  * @property CarbonImmutable $scheduled_at
@@ -17,6 +18,8 @@ class ScheduledJob extends Model implements SchedulableJob
     public $timestamps = false;
 
     protected $guarded = [];
+
+    protected $hidden = ['payload'];
 
     /**
      * @return array<string,string>

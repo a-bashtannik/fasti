@@ -16,14 +16,14 @@ interface FastiScheduledJobsRepository
      */
     public function all(): Collection;
 
-    public function store(object $job, DateTimeInterface|CarbonInterface $dateTime): int|string;
+    public function store(object $job, DateTimeInterface|CarbonInterface $dateTime): SchedulableJob;
 
     /**
      * @return Collection<int, SchedulableJob>|Collection<string, SchedulableJob>
      */
     public function scheduled(DateTimeInterface|CarbonInterface $at): Collection;
 
-    public function cancel(int|string $id): void;
+    public function cancel(int|string|SchedulableJob $id): SchedulableJob;
 
     /**
      * @return Collection<int, SchedulableJob>|Collection<string, SchedulableJob>

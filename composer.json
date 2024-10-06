@@ -43,6 +43,16 @@
       "Bashtannik\\Fasti\\Tests\\": "tests/"
     }
   },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Bashtannik\\Fasti\\Providers\\FastiServiceProvider"
+      ],
+      "aliases": {
+        "Fasti": "Bashtannik\\Fasti\\Facades\\Fasti"
+      }
+    }
+  },
   "require": {
     "php": "^8.2"
   },

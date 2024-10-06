@@ -9,28 +9,26 @@ use function Laravel\Prompts\table;
 
 class FastiListCommand extends Command
 {
-    protected $signature = 'fasti:list --all';
+    protected $signature = 'fasti:list';
 
     protected $description = 'List all scheduled jobs, add --all to include cancelled jobs.';
 
     public function handle(FastiService $fasti): void
     {
-        $all = $this->option('all');
-
-        $jobs = $all
-            ? $fasti->all()
-            : $fasti->scheduled(now());
+        $jobs = $fasti->all();
 
         table(
             array_values([
                 'ID',
+                'Type',
                 'Scheduled at',
-                'Canceled at',
+                'Cancelled at',
             ]),
-            $jobs->only([
-                'id',
-                'scheduled_at',
-                'canceled_at',
+            $jobs->map(fn ($job): array => [
+                'id' => $job->id,
+                'type' => $job->type,
+                'scheduled_at' => $job->scheduled_at,
+                'cancelled_at' => $job->cancelled_at ?? '-',
             ])->toArray()
         );
     }

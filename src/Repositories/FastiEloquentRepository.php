@@ -15,26 +15,46 @@ use Illuminate\Support\Collection;
 
 class FastiEloquentRepository implements FastiScheduledJobsRepository
 {
+    public static string $model = ScheduledJob::class;
+
+    /**
+     * @var array<string, class-string>
+     */
+    public static array $morphMap = [];
+
     public function all(): Collection
     {
-        return ScheduledJob::all();
+        return static::$model::all();
     }
 
-    public function store(object $job, DateTimeInterface|CarbonInterface $dateTime): int|string
+    /**
+     * @param  array<string, class-string>  $morphMap
+     */
+    public static function enforceTypeMap(array $morphMap): void
     {
-        $task = new ScheduledJob;
+        static::$morphMap = $morphMap;
+    }
 
-        if ($job instanceof ShouldBeEncrypted) {
-            $task->payload = encrypt(serialize(clone $job));
+    public function store(object $job, DateTimeInterface|CarbonInterface $dateTime): SchedulableJob
+    {
+        $scheduledJob = new static::$model;
+
+        if (count(self::$morphMap) && isset(array_flip(self::$morphMap)[$job::class])) {
+            $scheduledJob->type = array_flip(self::$morphMap)[$job::class];
         } else {
-            $task->payload = serialize(clone $job);
+            $scheduledJob->type = $job::class;
         }
 
-        $task->scheduled_at = CarbonImmutable::instance($dateTime);
+        if ($job instanceof ShouldBeEncrypted) {
+            $scheduledJob->payload = encrypt(serialize(clone $job));
+        } else {
+            $scheduledJob->payload = serialize(clone $job);
+        }
 
-        $task->save();
+        $scheduledJob->scheduled_at = CarbonImmutable::instance($dateTime);
+        $scheduledJob->save();
 
-        return $task->id;
+        return $scheduledJob;
     }
 
     public function scheduled(DateTimeInterface|CarbonInterface $at): Collection
@@ -42,26 +62,28 @@ class FastiEloquentRepository implements FastiScheduledJobsRepository
         $from = Carbon::instance($at)->startOf('minute');
         $to = Carbon::instance($at)->endOf('minute');
 
-        return ScheduledJob::query()
+        return static::$model::query()
             ->whereNull('cancelled_at')
             ->whereBetween('scheduled_at', [$from, $to])->get();
     }
 
-    public function cancel(string|int $id): void
+    public function cancel(string|int|SchedulableJob $id): SchedulableJob
     {
-        $job = ScheduledJob::query()->findOrFail($id);
+        $scheduledJob = static::$model::query()->findOrFail($id instanceof SchedulableJob ? $id->id : $id);
 
-        $job->cancelled_at = now()->toImmutable();
-        $job->save();
+        $scheduledJob->cancelled_at = now()->toImmutable();
+        $scheduledJob->save();
+
+        return $scheduledJob;
     }
 
     public function cancelled(): Collection
     {
-        return ScheduledJob::query()->whereNotNull('cancelled_at')->get();
+        return static::$model::query()->whereNotNull('cancelled_at')->get();
     }
 
     public function find(int|string $id): SchedulableJob
     {
-        return ScheduledJob::query()->findOrFail($id);
+        return static::$model::query()->findOrFail($id);
     }
 }
