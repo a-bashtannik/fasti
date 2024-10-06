@@ -13,6 +13,7 @@ use Carbon\CarbonInterface;
  * @property string $type
  * @property string $payload
  * @property CarbonInterface $scheduled_at
+ * @property CarbonInterface|null $dispatched_at
  * @property CarbonInterface|null $cancelled_at
  */
 interface SchedulableJob {}

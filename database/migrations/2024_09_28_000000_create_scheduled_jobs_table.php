@@ -13,6 +13,7 @@ return new class extends Migration
             $table->string('type');
             $table->longText('payload');
             $table->dateTime('scheduled_at');
+            $table->dateTime('dispatched_at')->nullable();
             $table->dateTime('cancelled_at')->nullable();
         });
     }

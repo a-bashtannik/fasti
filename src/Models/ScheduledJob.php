@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $type
  * @property string $payload
  * @property CarbonImmutable|null $cancelled_at
+ * @property CarbonImmutable|null $dispatched_at
  * @property CarbonImmutable $scheduled_at
  */
 class ScheduledJob extends Model implements SchedulableJob
@@ -29,6 +30,7 @@ class ScheduledJob extends Model implements SchedulableJob
         return [
             'cancelled_at' => 'immutable_datetime',
             'scheduled_at' => 'immutable_datetime',
+            'dispatched_at' => 'immutable_datetime',
         ];
     }
 }

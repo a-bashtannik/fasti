@@ -67,9 +67,9 @@ class FastiEloquentRepository implements FastiScheduledJobsRepository
             ->whereBetween('scheduled_at', [$from, $to])->get();
     }
 
-    public function cancel(string|int|SchedulableJob $id): SchedulableJob
+    public function cancel(string|int|SchedulableJob $scheduledJob): SchedulableJob
     {
-        $scheduledJob = static::$model::query()->findOrFail($id instanceof SchedulableJob ? $id->id : $id);
+        $scheduledJob = static::$model::query()->findOrFail($scheduledJob instanceof SchedulableJob ? $scheduledJob->id : $scheduledJob);
 
         $scheduledJob->cancelled_at = now()->toImmutable();
         $scheduledJob->save();
@@ -85,5 +85,15 @@ class FastiEloquentRepository implements FastiScheduledJobsRepository
     public function find(int|string $id): SchedulableJob
     {
         return static::$model::query()->findOrFail($id);
+    }
+
+    public function dispatch(int|string|SchedulableJob $scheduledJob): SchedulableJob
+    {
+        $scheduledJob = $scheduledJob instanceof SchedulableJob ? $scheduledJob : static::$model::query()->findOrFail($scheduledJob);
+
+        $scheduledJob->dispatched_at = now()->toImmutable();
+        $scheduledJob->save();
+
+        return $scheduledJob;
     }
 }

@@ -23,7 +23,7 @@ interface FastiScheduledJobsRepository
      */
     public function scheduled(DateTimeInterface|CarbonInterface $at): Collection;
 
-    public function cancel(int|string|SchedulableJob $id): SchedulableJob;
+    public function cancel(int|string|SchedulableJob $scheduledJob): SchedulableJob;
 
     /**
      * @return Collection<int, SchedulableJob>|Collection<string, SchedulableJob>
@@ -31,4 +31,6 @@ interface FastiScheduledJobsRepository
     public function cancelled(): Collection;
 
     public function find(int|string $id): SchedulableJob;
+
+    public function dispatch(int|string|SchedulableJob $scheduledJob): SchedulableJob;
 }

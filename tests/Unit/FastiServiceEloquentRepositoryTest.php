@@ -330,12 +330,19 @@ class FastiServiceEloquentRepositoryTest extends TestCase
 
         // act
 
+        $this->travelTo($dateTime);
+
         self::$fasti->dispatch($scheduledJob->id);
 
         // assert
 
         Bus::assertDispatchedSync(FakeJob::class);
-        Event::fake(JobDispatched::class);
+        Event::assertDispatched(JobDispatched::class);
+
+        $this->assertDatabaseHas('scheduled_jobs', [
+            'id' => $scheduledJob->id,
+            'dispatched_at' => now()->format('Y-m-d H:i:s'),
+        ]);
     }
 
     public function test_can_dispatch_queued_job(): void
@@ -351,6 +358,8 @@ class FastiServiceEloquentRepositoryTest extends TestCase
 
         $scheduledJob = self::$fasti->schedule($job, $dateTime);
 
+        $this->travelTo($dateTime);
+
         // act
 
         self::$fasti->dispatch($scheduledJob->id);
@@ -359,6 +368,11 @@ class FastiServiceEloquentRepositoryTest extends TestCase
 
         Bus::assertDispatched(FakeQueuedJob::class);
         Event::assertDispatched(JobDispatched::class);
+
+        $this->assertDatabaseHas('scheduled_jobs', [
+            'id' => $scheduledJob->id,
+            'dispatched_at' => now()->format('Y-m-d H:i:s'),
+        ]);
     }
 
     public function test_can_dispatch_encrypted_job(): void

@@ -20,6 +20,9 @@ class FastiTickCommand extends Command
         $jobs = Fasti::scheduled($now);
 
         $jobs->each(function (SchedulableJob $job): void {
+
+            $this->info('Dispatching job: '.$job->id);
+
             Fasti::dispatch($job->id);
         });
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Bashtannik\Fasti\Tests\Unit;
 
+use Bashtannik\Fasti\Events\JobDispatched;
 use Bashtannik\Fasti\Repositories\FastiArrayRepository;
 use Bashtannik\Fasti\Services\BusJobDispatcher;
 use Bashtannik\Fasti\Services\FastiService;
@@ -14,6 +15,7 @@ use Bashtannik\Fasti\Tests\TestCase;
 use DateTime;
 use DateTimeImmutable;
 use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Event;
 
 class FastiServiceArrayRepositoryTest extends TestCase
 {
@@ -243,12 +245,15 @@ class FastiServiceArrayRepositoryTest extends TestCase
         // arrange
 
         Bus::fake(FakeJob::class);
+        Event::fake(JobDispatched::class);
 
         $job = new FakeJob;
 
         $dateTime = new DateTime('now');
 
         $scheduledJob = self::$fasti->schedule($job, $dateTime);
+
+        $this->travelTo($dateTime);
 
         // act
 
@@ -257,6 +262,9 @@ class FastiServiceArrayRepositoryTest extends TestCase
         // assert
 
         Bus::assertDispatchedSync(FakeJob::class);
+        Event::assertDispatched(JobDispatched::class);
+
+        $this->assertEquals($dateTime, self::$fasti->getRepository()->find($scheduledJob->id)->dispatched_at);
     }
 
     public function test_can_dispatch_queued_job(): void
@@ -264,12 +272,15 @@ class FastiServiceArrayRepositoryTest extends TestCase
         // arrange
 
         Bus::fake(FakeQueuedJob::class);
+        Event::fake(JobDispatched::class);
 
         $job = new FakeQueuedJob;
 
         $dateTime = new DateTime('now');
 
         $scheduledJob = self::$fasti->schedule($job, $dateTime);
+
+        $this->travelTo($dateTime);
 
         // act
 
@@ -278,6 +289,9 @@ class FastiServiceArrayRepositoryTest extends TestCase
         // assert
 
         Bus::assertDispatched(FakeQueuedJob::class);
+        Event::assertDispatched(JobDispatched::class);
+
+        $this->assertEquals($dateTime, self::$fasti->getRepository()->find($scheduledJob->id)->dispatched_at);
     }
 
     public function test_can_dispatch_encrypted_job(): void

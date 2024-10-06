@@ -22,6 +22,7 @@ class GenericScheduledJob implements SchedulableJob
         public string $type,
         public string $payload,
         public CarbonInterface $scheduled_at,
+        public ?CarbonInterface $dispatched_at,
         public ?CarbonInterface $cancelled_at,
     ) {}
 

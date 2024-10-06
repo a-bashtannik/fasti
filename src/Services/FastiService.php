@@ -103,6 +103,8 @@ class FastiService
             $instance = unserialize($scheduledJob->payload);
         }
 
+        $this->repository->dispatch($scheduledJob);
+
         Event::dispatch(new JobDispatched($scheduledJob));
 
         if ($instance instanceof ShouldQueue) {

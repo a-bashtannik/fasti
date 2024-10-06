@@ -30,6 +30,7 @@ class FastiArrayRepository implements Fake, FastiScheduledJobsRepository
             type: $job::class,
             payload: serialize($job),
             scheduled_at: Carbon::instance($dateTime),
+            dispatched_at: null,
             cancelled_at: null,
         );
 
@@ -45,9 +46,9 @@ class FastiArrayRepository implements Fake, FastiScheduledJobsRepository
         );
     }
 
-    public function cancel(int|string|SchedulableJob $id): SchedulableJob
+    public function cancel(int|string|SchedulableJob $scheduledJob): SchedulableJob
     {
-        $key = $id instanceof SchedulableJob ? $id->id : $id;
+        $key = $scheduledJob instanceof SchedulableJob ? $scheduledJob->id : $scheduledJob;
 
         $this->jobsToFake[$key]->cancelled_at = now();
 
@@ -62,5 +63,14 @@ class FastiArrayRepository implements Fake, FastiScheduledJobsRepository
     public function find(int|string $id): SchedulableJob
     {
         return $this->jobsToFake[$id];
+    }
+
+    public function dispatch(int|string|SchedulableJob $scheduledJob): SchedulableJob
+    {
+        $key = $scheduledJob instanceof SchedulableJob ? $scheduledJob->id : $scheduledJob;
+
+        $this->jobsToFake[$key]->dispatched_at = now();
+
+        return $this->jobsToFake[$key];
     }
 }
