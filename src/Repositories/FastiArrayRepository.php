@@ -23,16 +23,19 @@ class FastiArrayRepository implements Fake, FastiScheduledJobsRepository
         return collect($this->jobsToFake);
     }
 
-    public function store(object $job, DateTimeInterface|CarbonInterface $dateTime): int|string
+    public function store(object $job, DateTimeInterface|CarbonInterface $dateTime): SchedulableJob
     {
-        $this->jobsToFake[] = new GenericScheduledJob(
+        $scheduledJob = new GenericScheduledJob(
             id: count($this->jobsToFake),
+            type: $job::class,
             payload: serialize($job),
             scheduled_at: Carbon::instance($dateTime),
             cancelled_at: null,
         );
 
-        return count($this->jobsToFake) - 1;
+        $this->jobsToFake[] = $scheduledJob;
+
+        return $scheduledJob;
     }
 
     public function scheduled(DateTimeInterface|CarbonInterface $at): Collection
@@ -42,9 +45,13 @@ class FastiArrayRepository implements Fake, FastiScheduledJobsRepository
         );
     }
 
-    public function cancel(int|string $id): void
+    public function cancel(int|string|SchedulableJob $id): SchedulableJob
     {
-        $this->jobsToFake[$id]->cancelled_at = now();
+        $key = $id instanceof SchedulableJob ? $id->id : $id;
+
+        $this->jobsToFake[$key]->cancelled_at = now();
+
+        return $this->jobsToFake[$key];
     }
 
     public function cancelled(): Collection

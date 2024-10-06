@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('scheduled_jobs', function (Blueprint $table) {
             $table->id();
+            $table->string('type');
             $table->longText('payload');
             $table->dateTime('scheduled_at');
             $table->dateTime('cancelled_at')->nullable();
@@ -18,6 +19,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('scheduled_tasks');
+        Schema::dropIfExists('scheduled_jobs');
     }
 };

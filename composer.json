@@ -1,6 +1,7 @@
 {
   "name": "a-bashtannik/fasti",
   "description": "Laravel task scheduler with calendar-based management.",
+  "version": "dev-main",
   "keywords": [
     "laravel",
     "package",
@@ -41,6 +42,16 @@
   "autoload-dev": {
     "psr-4": {
       "Bashtannik\\Fasti\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Bashtannik\\Fasti\\Providers\\FastiServiceProvider"
+      ],
+      "aliases": {
+        "Fasti": "Bashtannik\\Fasti\\Facades\\Fasti"
+      }
     }
   },
   "require": {

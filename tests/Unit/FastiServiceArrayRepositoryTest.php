@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Bashtannik\Fasti\Tests\Unit;
 
 use Bashtannik\Fasti\Repositories\FastiArrayRepository;
+use Bashtannik\Fasti\Services\BusJobDispatcher;
 use Bashtannik\Fasti\Services\FastiService;
 use Bashtannik\Fasti\Tests\Fake\FakeEncryptedJob;
 use Bashtannik\Fasti\Tests\Fake\FakeJob;
@@ -22,10 +23,10 @@ class FastiServiceArrayRepositoryTest extends TestCase
     {
         parent::setUp();
 
-        self::$fasti = new FastiService(new FastiArrayRepository);
+        self::$fasti = new FastiService(new FastiArrayRepository, new BusJobDispatcher);
     }
 
-    public function test_can_schedule_job_date_time(): void
+    public function test_can_schedule_job_at_date_time(): void
     {
         // arrange
 
@@ -35,17 +36,17 @@ class FastiServiceArrayRepositoryTest extends TestCase
 
         // act
 
-        $id = self::$fasti->schedule($job, $dateTime);
+        $scheduledJob = self::$fasti->schedule($job, $dateTime);
 
         // assert
 
-        $scheduledJob = self::$fasti->getRepository()->find($id);
+        $scheduledJob = self::$fasti->getRepository()->find($scheduledJob->id);
 
         $this->assertEquals(serialize($job), $scheduledJob->payload, 'The job should be the one we scheduled.');
         $this->assertEquals($dateTime->format('Y-m-d H:i:s'), $scheduledJob->scheduled_at->format('Y-m-d H:i:s'), 'The scheduled date should be the one we scheduled.');
     }
 
-    public function test_can_schedule_job_date_time_immutable(): void
+    public function test_can_schedule_job_at_date_time_immutable(): void
     {
         // arrange
 
@@ -55,17 +56,17 @@ class FastiServiceArrayRepositoryTest extends TestCase
 
         // act
 
-        $id = self::$fasti->schedule($job, $dateTime);
+        $scheduledJob = self::$fasti->schedule($job, $dateTime);
 
         // assert
 
-        $scheduledJob = self::$fasti->getRepository()->find($id);
+        $scheduledJob = self::$fasti->getRepository()->find($scheduledJob->id);
 
         $this->assertEquals(serialize($job), $scheduledJob->payload, 'The job should be the one we scheduled.');
         $this->assertEquals($dateTime->format('Y-m-d H:i:s'), $scheduledJob->scheduled_at->format('Y-m-d H:i:s'), 'The scheduled date should be the one we scheduled.');
     }
 
-    public function test_can_schedule_job_carbon(): void
+    public function test_can_schedule_job_at_carbon(): void
     {
         // arrange
 
@@ -75,17 +76,17 @@ class FastiServiceArrayRepositoryTest extends TestCase
 
         // act
 
-        $id = self::$fasti->schedule($job, $dateTime);
+        $scheduledJob = self::$fasti->schedule($job, $dateTime);
 
         // assert
 
-        $scheduledJob = self::$fasti->getRepository()->find($id);
+        $scheduledJob = self::$fasti->getRepository()->find($scheduledJob->id);
 
         $this->assertEquals(serialize($job), $scheduledJob->payload, 'The job should be the one we scheduled.');
         $this->assertEquals($dateTime->format('Y-m-d H:i:s'), $scheduledJob->scheduled_at->format('Y-m-d H:i:s'), 'The scheduled date should be the one we scheduled.');
     }
 
-    public function test_can_schedule_job_carbon_immutable(): void
+    public function test_can_schedule_job_at_carbon_immutable(): void
     {
         // arrange
 
@@ -95,11 +96,31 @@ class FastiServiceArrayRepositoryTest extends TestCase
 
         // act
 
-        $id = self::$fasti->schedule($job, $dateTime);
+        $scheduledJob = self::$fasti->schedule($job, $dateTime);
 
         // assert
 
-        $scheduledJob = self::$fasti->getRepository()->find($id);
+        $scheduledJob = self::$fasti->getRepository()->find($scheduledJob->id);
+
+        $this->assertEquals(serialize($job), $scheduledJob->payload, 'The job should be the one we scheduled.');
+        $this->assertEquals($dateTime->format('Y-m-d H:i:s'), $scheduledJob->scheduled_at->format('Y-m-d H:i:s'), 'The scheduled date should be the one we scheduled.');
+    }
+
+    public function test_can_schedule_job_at_string(): void
+    {
+        // arrange
+
+        $job = new FakeJob;
+
+        $dateTime = now();
+
+        // act
+
+        $scheduledJob = self::$fasti->schedule($job, $dateTime->toDateTimeString());
+
+        // assert
+
+        $scheduledJob = self::$fasti->getRepository()->find($scheduledJob->id);
 
         $this->assertEquals(serialize($job), $scheduledJob->payload, 'The job should be the one we scheduled.');
         $this->assertEquals($dateTime->format('Y-m-d H:i:s'), $scheduledJob->scheduled_at->format('Y-m-d H:i:s'), 'The scheduled date should be the one we scheduled.');
@@ -115,11 +136,11 @@ class FastiServiceArrayRepositoryTest extends TestCase
 
         // act
 
-        $id = self::$fasti->schedule($job, $dateTime);
+        $scheduledJob = self::$fasti->schedule($job, $dateTime);
 
         // assert
 
-        $scheduledJob = self::$fasti->getRepository()->find($id);
+        $scheduledJob = self::$fasti->getRepository()->find($scheduledJob->id);
 
         $this->assertEquals(serialize($job), $scheduledJob->payload, 'The job should be the one we scheduled.');
         $this->assertEquals($dateTime->format('Y-m-d H:i:s'), $scheduledJob->scheduled_at->format('Y-m-d H:i:s'), 'The scheduled date should be the one we scheduled.');
@@ -134,7 +155,7 @@ class FastiServiceArrayRepositoryTest extends TestCase
 
         $dateTime = new DateTime('now');
 
-        $id = self::$fasti->schedule($job, $dateTime);
+        $scheduledJob = self::$fasti->schedule($job, $dateTime);
 
         $cancelledId = self::$fasti->schedule($scheduledJob, $dateTime);
         self::$fasti->cancel($cancelledId);
@@ -146,7 +167,7 @@ class FastiServiceArrayRepositoryTest extends TestCase
         // assert
 
         $this->assertCount(1, $jobs, 'Only the scheduled job should be returned.');
-        $this->assertEquals($id, $jobs->first()->id, 'The scheduled job should be the one we scheduled.');
+        $this->assertEquals($scheduledJob, $jobs->first(), 'The scheduled job should be the one we scheduled.');
     }
 
     public function test_can_cancel_scheduled_job(): void
@@ -157,15 +178,15 @@ class FastiServiceArrayRepositoryTest extends TestCase
 
         $dateTime = new DateTime('now');
 
-        $id = self::$fasti->schedule($job, $dateTime);
+        $scheduledJob = self::$fasti->schedule($job, $dateTime);
 
         // act
 
-        self::$fasti->cancel($id);
+        self::$fasti->cancel($scheduledJob);
 
         // assert
 
-        $job = self::$fasti->getRepository()->find($id);
+        $job = self::$fasti->getRepository()->find($scheduledJob->id);
 
         $this->assertNotNull($job->cancelled_at, 'The job should be canceled.');
     }
@@ -181,8 +202,8 @@ class FastiServiceArrayRepositoryTest extends TestCase
 
         self::$fasti->schedule($job, $dateTime);
 
-        $id = self::$fasti->schedule($canceledJob, $dateTime);
-        self::$fasti->cancel($id);
+        $scheduledJob = self::$fasti->schedule($canceledJob, $dateTime);
+        self::$fasti->cancel($scheduledJob);
 
         // act
 
@@ -191,7 +212,7 @@ class FastiServiceArrayRepositoryTest extends TestCase
         // assert
 
         $this->assertCount(1, $jobs, 'Only the canceled job should be returned.');
-        $this->assertEquals($id, $jobs->first()->id, 'The canceled job should be the one we canceled.');
+        $this->assertEquals($scheduledJob, $jobs->first(), 'The canceled job should be the one we canceled.');
     }
 
     public function test_can_get_all_jobs(): void
@@ -205,8 +226,8 @@ class FastiServiceArrayRepositoryTest extends TestCase
 
         self::$fasti->schedule($job, $dateTime);
 
-        $id = self::$fasti->schedule($canceledJob, $dateTime);
-        self::$fasti->cancel($id);
+        $scheduledJob = self::$fasti->schedule($canceledJob, $dateTime);
+        self::$fasti->cancel($scheduledJob);
 
         // act
 
@@ -227,11 +248,11 @@ class FastiServiceArrayRepositoryTest extends TestCase
 
         $dateTime = new DateTime('now');
 
-        $id = self::$fasti->schedule($job, $dateTime);
+        $scheduledJob = self::$fasti->schedule($job, $dateTime);
 
         // act
 
-        self::$fasti->dispatch($id);
+        self::$fasti->dispatch($scheduledJob);
 
         // assert
 
@@ -248,11 +269,11 @@ class FastiServiceArrayRepositoryTest extends TestCase
 
         $dateTime = new DateTime('now');
 
-        $id = self::$fasti->schedule($job, $dateTime);
+        $scheduledJob = self::$fasti->schedule($job, $dateTime);
 
         // act
 
-        self::$fasti->dispatch($id);
+        self::$fasti->dispatch($scheduledJob);
 
         // assert
 
@@ -269,11 +290,11 @@ class FastiServiceArrayRepositoryTest extends TestCase
 
         $dateTime = new DateTime('now');
 
-        $id = self::$fasti->schedule($job, $dateTime);
+        $scheduledJob = self::$fasti->schedule($job, $dateTime);
 
         // act
 
-        self::$fasti->dispatch($id);
+        self::$fasti->dispatch($scheduledJob);
 
         // assert
 

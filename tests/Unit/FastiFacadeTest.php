@@ -7,6 +7,7 @@ namespace Bashtannik\Fasti\Tests\Unit;
 use Bashtannik\Fasti\Facades\Fasti;
 use Bashtannik\Fasti\Repositories\FastiArrayRepository;
 use Bashtannik\Fasti\Services\FastiService;
+use Bashtannik\Fasti\Tests\Fake\FakeEncryptedJob;
 use Bashtannik\Fasti\Tests\Fake\FakeJob;
 use Bashtannik\Fasti\Tests\TestCase;
 use DateTime;
@@ -41,6 +42,8 @@ class FastiFacadeTest extends TestCase
 
         $notScheduledJob = new FakeJob(2);
 
+        $notScheduledEncryptedJob = new FakeEncryptedJob; // Other instance
+
         $dateTime = new DateTime('now');
 
         // act
@@ -51,8 +54,17 @@ class FastiFacadeTest extends TestCase
 
         Fasti::assertScheduled($job);
         Fasti::assertScheduledAt($job, $dateTime);
+        Fasti::assertScheduledAt($job, $dateTime->format('Y-m-d H:i:s'));
         Fasti::assertNotScheduled($notScheduledJob);
         Fasti::assertNotScheduledAt($job, new DateTime('tomorrow'));
+        Fasti::assertNotScheduledAt($job, (new DateTime('tomorrow'))->format('Y-m-d H:i:s'));
+
+        Fasti::assertScheduled($job::class);
+        Fasti::assertScheduledAt($job::class, $dateTime);
+        Fasti::assertScheduledAt($job::class, $dateTime->format('Y-m-d H:i:s'));
+        Fasti::assertNotScheduled($notScheduledEncryptedJob::class); // Other instance
+        Fasti::assertNotScheduledAt($job::class, new DateTime('tomorrow'));
+        Fasti::assertNotScheduledAt($job::class, (new DateTime('tomorrow'))->format('Y-m-d H:i:s'));
     }
 
     public function test_can_assert_canceled_state(): void
