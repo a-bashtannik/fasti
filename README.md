@@ -4,9 +4,9 @@
 </p>
 <p align="center">
 <a href="https://github.com/a-bashtannik/fasti/actions"><img src="https://github.com/a-bashtannik/fasti/actions/workflows/unit-tests.yml/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/a-bashtannik/fasti"><img src="https://img.shields.io/packagist/dt/a-bashtannik/fasti" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/a-bashtannik/fasti"><img src="https://img.shields.io/packagist/v/a-bashtannik/fasti" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/a-bashtannik/fasti"><img src="https://img.shields.io/packagist/l/a-bashtannik/fasti" alt="License"></a>
+<a href="https://packagist.org/packages/a-bashtannik/fasti"><img src="https://img.shields.io/packagist/dt/a-bashtannik/fasti?style=flat" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/a-bashtannik/fasti"><img src="https://img.shields.io/packagist/v/a-bashtannik/fasti?style=flat" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/a-bashtannik/fasti"><img src="https://img.shields.io/packagist/l/a-bashtannik/fasti?style=flat" alt="License"></a>
 </p>
 
 Fasti is a Laravel package that enables developers to precisely schedule task execution in the future. With Fasti, you can defer the launch of any `Job` for any period, specifying the time and date to the minute. At the designated time, Fasti retrieves the required Job from the repository and either executes it synchronously or dispatches it to a queue.
