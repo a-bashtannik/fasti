@@ -207,3 +207,9 @@ FastiEloquentRepository::enforceTypeMapping([
 ```
 
 This field doesn't affect the job execution but can be useful for debugging or logging purposes.
+
+### Hint: monitor your scheduled jobs using artisan `fasti:list` command
+
+<img src="https://github.com/user-attachments/assets/c8618517-d80a-4f36-b25b-b2d9f226f4d5" width="50%">
+
+
