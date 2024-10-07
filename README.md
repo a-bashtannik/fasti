@@ -28,7 +28,7 @@ Fasti::schedule($job, '2024-12-31 23:59:59'); // Schedule a job for New Year's E
 composer require a-bashtannik/fasti
 ```
 
-Add the tick command to your `console.php` file:
+⚠️ Add the tick command to your `console.php` file:
 
 ```php
 use Bashtannik\Fasti\Console\Commands\FastiTickCommand;
@@ -213,3 +213,8 @@ This field doesn't affect the job execution but can be useful for debugging or l
 <img src="https://github.com/user-attachments/assets/c8618517-d80a-4f36-b25b-b2d9f226f4d5" width="50%">
 
 
+### Simulate time in your manual tests and check if the job is executed
+
+```sh
+php artisan fasti:tick --now="2024-12-31 23:59:59"
+```
