@@ -24,8 +24,12 @@ Fasti::schedule($job, '2024-12-31 23:59:59'); // Schedule a job for New Year's E
 > [!NOTE]
 > This package requires PHP 8.2+ and Laravel 11+
 
-```
+```sh
 composer require a-bashtannik/fasti
+```
+Publish migration table:
+```sh
+php artisan vendor:publish --provider="Bashtannik\Fasti\Providers\FastiServiceProvider"
 ```
 
 ⚠️ Add the tick command to your `console.php` file:
